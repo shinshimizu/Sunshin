@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class PlayerView : Element
 {
+    public PlayerModel player;
+    /*
     public int maxHealth = 100;
     public int attack = 2;
-    public int magic = 0;
-    public int defense = 0;
-    public int resistance = 0;
+    public int magic = 1;
+    public int defense = 1;
+    public int resistance = 1;
     public double critChance = 0.05;
     public double critDamage = 1.5;
     public double dodge = 0.05;
@@ -30,4 +32,5 @@ public class Player : MonoBehaviour
         currentHealth -= damage;
         healthBar.SetHealth(currentHealth);
     }
+    */
 }
