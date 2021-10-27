@@ -11,8 +11,7 @@ public class BtnAttack : MonoBehaviour
     public Player player;
     public Enemy enemy;
 
-
-    public void OnClick()
+    public void PlayerAttack()
     {
         if(Random.value < enemy.dodge)
         {
@@ -21,7 +20,12 @@ public class BtnAttack : MonoBehaviour
         else
         {
             double rnd = GetRandomNumber(50, 101);
-            total = player.attack + (int)(weaponAtt * rnd);
+            float power = (float)enemy.defense / (float)player.attack;
+            //Debug.Log("Power is " + power);
+            double percentDamage = Mathf.Pow(0.5f, power);
+            //Debug.Log("Damage percent is " + percentDamage);
+            int damage = player.attack + (int)(weaponAtt * rnd);
+            total = (int)(damage * percentDamage);
             if (Random.value < player.critChance)
             {
                 total = (int)(total * player.critDamage);
@@ -47,7 +51,11 @@ public class BtnAttack : MonoBehaviour
         else
         {
             double rnd = GetRandomNumber(50, 101);
-            total = (int)(enemy.attack * rnd);
+            float power = (float)player.defense / (float)enemy.attack;
+            double percentDamage = Mathf.Pow(0.5f, power);
+            //Debug.Log("Damage percent is " + percentDamage);
+            int damage = (int)(enemy.attack * rnd);
+            total = (int)(damage * percentDamage);
             if (Random.value < enemy.critChance)
             {
                 total = (int)(total * player.critDamage);
@@ -61,7 +69,7 @@ public class BtnAttack : MonoBehaviour
         }
     }
 
-    public double GetRandomNumber(int min, int max)
+    double GetRandomNumber(int min, int max)
     {
         double random = Random.Range(min, max);
         return random / 100;
