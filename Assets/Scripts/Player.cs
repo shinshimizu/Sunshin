@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    public GameObject character;
+
     public int maxHealth = 100;
     public int currentHealth;
     public int attack = 2;

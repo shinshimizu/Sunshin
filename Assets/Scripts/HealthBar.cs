@@ -5,19 +5,36 @@ using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
-    public Slider slider;
-    public Text text;
+    public Slider healthSlider;
+    public Slider energySlider;
+    public Text healthText;
+    public Text energyText;
 
     public void SetMaxHealth(int health)
     {
-        text.text = "HP : "+ health.ToString();
-        slider.maxValue = health;
-        slider.value = health;
+        healthText.text = "HP : "+ health.ToString();
+        healthSlider.maxValue = health;
+        healthSlider.minValue = 0;
+        healthSlider.value = health;
     }
 
     public void SetHealth(int health)
     {
-        text.text = "HP : " + health.ToString();
-        slider.value = health;
+        healthText.text = "HP : " + health.ToString();
+        healthSlider.value = health;
+    }
+
+    public void SetMaxEnergy(int energy)
+    {
+        energyText.text = "EP : " + energy.ToString();
+        energySlider.maxValue = energy;
+        energySlider.minValue = 0;
+        energySlider.value = energy;
+    }
+
+    public void SetEnergy(int energy)
+    {
+        energyText.text = "EP : " + energy.ToString();
+        energySlider.value = energy;
     }
 }

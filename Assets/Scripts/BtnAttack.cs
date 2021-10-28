@@ -6,66 +6,107 @@ using UnityEngine.UI;
 public class BtnAttack : MonoBehaviour
 {
     int weaponAtt = 10;
+    int spellA = 10;
+    int spellB = 20;
+    int spellC = 2;
+    //int[] condiDamage;
+    //int[] condiTurn;
     int total;
+    bool turn;
 
-    public Player player;
-    public Enemy enemy;
+    public CharacterScript player;
+    public CharacterScript enemy;
+    public Button[] buttons = new Button[4];
+
+    void Start()
+    {
+        player.SetStats(100, 100, 2, 1, 2, 1, 1, 2, 0.05, 1.5);
+        enemy.SetStats(100, 100, 10, 0, 5, 2, 1, 1, 0.05, 1.5);
+    }
 
     public void PlayerAttack()
     {
-        if(Random.value < enemy.dodge)
+        turn = true;
+        StartCoroutine(AttackHandler(player, enemy, player.attack, enemy.defense, weaponAtt, 0));
+    }
+
+    public void PlayerSkill1()
+    {
+        turn = true;
+        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellA, 0));
+    }
+
+    public void PlayerSkill2()
+    {
+        turn = true;
+        //condiDamage[2] = 5;
+        //condiTurn[2] = 3;
+        player.EnergyUpdate(-10);
+        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellB, 0));
+    }
+
+    public void PlayerSkill3()
+    {
+        turn = true;
+        player.EnergyUpdate(25);
+        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellC, 0));
+    }
+
+    IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, int attackType, int defendType, int skill, int delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        ButtonsInteraction(false);
+
+        double dodge = 0.05;
+        if (defender.evasion > attacker.aim) // calculate dodge
+        {
+            dodge = 0.05 * 2 * defender.evasion / attacker.aim;
+        }
+
+        if (Random.value > dodge || defender.currentEnergy == 0) // attack successful
+        {
+            double rnd1 = GetRandomNumber(75, 101);
+            double rnd2 = GetRandomNumber(50, 101);
+            float power = (float)defendType / (float)attackType;
+            double percentDamage = Mathf.Pow(0.5f, power);
+            int damage = (int)((attackType * rnd1) + (skill * rnd2));
+            total = (int)(damage * percentDamage);
+
+            if (Random.value < attacker.critChance) // calculate crit damage
+            {
+                total = (int)(total * attacker.critDamage);
+                Debug.Log(total + "critical damage!");
+            }
+            else
+            {
+                Debug.Log(total + "damage.");
+            }
+
+            defender.TakeDamage(total);               
+        }
+        else // dodge successful
         {
             Debug.Log("Attack missed");
         }
-        else
-        {
-            double rnd = GetRandomNumber(50, 101);
-            float power = (float)enemy.defense / (float)player.attack;
-            //Debug.Log("Power is " + power);
-            double percentDamage = Mathf.Pow(0.5f, power);
-            //Debug.Log("Damage percent is " + percentDamage);
-            int damage = player.attack + (int)(weaponAtt * rnd);
-            total = (int)(damage * percentDamage);
-            if (Random.value < player.critChance)
-            {
-                total = (int)(total * player.critDamage);
-                Debug.Log("Player do critical attack deals " + total + "damage.");
-            }
-            else
-            {
-                Debug.Log("Player attack deals " + total + "damage.");
-            }
 
-            enemy.TakeDamage(total);
-            Invoke("EnemyTurn", 1);
+        if (defender.currentHealth > 0 && !turn)
+        {
+            ButtonsInteraction(true);
         }
-        
+
+        if (turn) // enemy turn
+        {
+            turn = false;
+            StartCoroutine(AttackHandler(enemy, player, enemy.attack, player.defense, 1, 1));            
+        }
     }
 
-    void EnemyTurn()
+    void ButtonsInteraction(bool interaction)
     {
-        if (Random.value < player.dodge)
+        foreach (Button b in buttons)
         {
-            Debug.Log("Player dodged enemy attacks.");
-        }
-        else
-        {
-            double rnd = GetRandomNumber(50, 101);
-            float power = (float)player.defense / (float)enemy.attack;
-            double percentDamage = Mathf.Pow(0.5f, power);
-            //Debug.Log("Damage percent is " + percentDamage);
-            int damage = (int)(enemy.attack * rnd);
-            total = (int)(damage * percentDamage);
-            if (Random.value < enemy.critChance)
-            {
-                total = (int)(total * player.critDamage);
-                Debug.Log("Enemy do critical attack deals " + total + "damage.");
-            }
-            else
-            {
-                Debug.Log("Enemy attack deals " + total + "damage.");
-            }
-            player.TakeDamage(total);
+            b.interactable = interaction;
         }
     }
 
