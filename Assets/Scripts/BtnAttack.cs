@@ -8,11 +8,11 @@ public class BtnAttack : MonoBehaviour
     int weaponAtt = 10;
     int spellA = 10;
     int spellB = 20;
-    int spellC = 2;
     //int[] condiDamage;
     //int[] condiTurn;
     int total;
     bool turn;
+    bool statusAttack;
 
     public CharacterScript player;
     public CharacterScript enemy;
@@ -27,21 +27,23 @@ public class BtnAttack : MonoBehaviour
     public void PlayerAttack()
     {
         turn = true;
+        print("Player uses basic attack");
         StartCoroutine(AttackHandler(player, enemy, player.attack, enemy.defense, weaponAtt, 0));
     }
 
     public void PlayerSkill1()
     {
         turn = true;
+        print("Player uses skill attack and debuff enemy attack for 1 turn");
         StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellA, 0));
     }
 
     public void PlayerSkill2()
     {
         turn = true;
-        //condiDamage[2] = 5;
-        //condiTurn[2] = 3;
         player.EnergyUpdate(-10);
+        statusAttack = true;
+        print("Player uses wind attack and airborne enemy for 1 turn");
         StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellB, 0));
     }
 
@@ -49,7 +51,14 @@ public class BtnAttack : MonoBehaviour
     {
         turn = true;
         player.EnergyUpdate(25);
-        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellC, 0));
+        int x = (int)(player.defense * 1.5) - player.defense;
+        if (!player.statuses.isDefbuff)
+        {
+            player.defense = (int)(player.defense * 1.5);
+        }
+        player.statuses.SetDefbuff(x, 2);
+        print("Player uses energy recovery skill and increasing defend for 2 turn");
+        EnemyTurn();
     }
 
     IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, int attackType, int defendType, int skill, int delay)
@@ -66,39 +75,75 @@ public class BtnAttack : MonoBehaviour
 
         if (Random.value > dodge || defender.currentEnergy == 0) // attack successful
         {
-            double rnd1 = GetRandomNumber(75, 101);
-            double rnd2 = GetRandomNumber(50, 101);
             float power = (float)defendType / (float)attackType;
             double percentDamage = Mathf.Pow(0.5f, power);
-            int damage = (int)((attackType * rnd1) + (skill * rnd2));
+            int damage = (int)((attackType * GetRandomNumber(75, 101)) + (skill * GetRandomNumber(50, 101)));
             total = (int)(damage * percentDamage);
 
             if (Random.value < attacker.critChance) // calculate crit damage
             {
                 total = (int)(total * attacker.critDamage);
-                Debug.Log(total + "critical damage!");
+                print(total + " critical damage!");
             }
             else
             {
-                Debug.Log(total + "damage.");
+                print(total + " damage.");
             }
 
-            defender.TakeDamage(total);               
+            defender.TakeDamage(total);
+            
+            if (statusAttack) // applying status effect
+            {
+
+            }
         }
         else // dodge successful
         {
-            Debug.Log("Attack missed");
-        }
-
-        if (defender.currentHealth > 0 && !turn)
-        {
-            ButtonsInteraction(true);
+            print("Attack missed");
         }
 
         if (turn) // enemy turn
         {
             turn = false;
-            StartCoroutine(AttackHandler(enemy, player, enemy.attack, player.defense, 1, 1));            
+            EnemyTurn();                        
+        }
+        else
+        {
+            PlayerTurn();
+        }
+    }
+
+    void PlayerTurn()
+    {
+        player.CheckStats();
+        if (enemy.currentEnergy > 0 && player.currentHealth > 0)
+        {
+            ButtonsInteraction(true);
+        }
+    }
+
+    void EnemyTurn()
+    {
+        enemy.CheckStats();
+
+        switch ((int)(GetRandomNumber(1, 4) * 100))
+        {
+            case 1:
+                print("Enemy uses basic attack");
+                StartCoroutine(AttackHandler(enemy, player, enemy.attack, player.defense, 1, 1));
+                break;
+            case 2:
+                print("Enemy is defending for 1 turn");
+                enemy.defense += 2;
+                enemy.statuses.SetDefbuff(2, 1);
+                PlayerTurn();
+                break;
+            case 3:
+                print("Enemy is raging for 1 turn");
+                enemy.attack += 2;
+                enemy.statuses.SetAttbuff(2, 1);
+                PlayerTurn();
+                break;
         }
     }
 
@@ -107,6 +152,11 @@ public class BtnAttack : MonoBehaviour
         foreach (Button b in buttons)
         {
             b.interactable = interaction;
+        }
+
+        if (player.currentEnergy < 10)
+        {
+            buttons[2].interactable = false;
         }
     }
 

@@ -6,6 +6,7 @@ public class CharacterScript : MonoBehaviour
 {
     public HealthBar healthBar;
     public NotifboardScript notifBoard;
+    public StatusesScript statuses;
 
     public int maxHealth;
     public int currentHealth;
@@ -41,23 +42,63 @@ public class CharacterScript : MonoBehaviour
     public void EnergyUpdate(int cost)
     {
         currentEnergy += cost;
+        CheckEnergyBar();
         healthBar.SetEnergy(currentEnergy);
     }
 
     public void TakeDamage(int damage)
-    {      
-        if(currentHealth > damage)
+    {
+        currentHealth -= damage;
+        CheckHealthBar();
+        healthBar.SetHealth(currentHealth);
+        currentEnergy -= 10;
+        CheckEnergyBar();
+        healthBar.SetEnergy(currentEnergy);
+        if (currentHealth < damage)
         {
-            currentHealth -= damage;
-            healthBar.SetHealth(currentHealth);
-            currentEnergy -= 10;
-            healthBar.SetEnergy(currentEnergy);
-        }
-        else
-        {
-            currentHealth = 0;
-            healthBar.SetHealth(currentHealth);
             notifBoard.CheckBattle();
+        }
+    }
+
+    void CheckHealthBar()
+    {
+        if (currentHealth > maxHealth)
+            currentEnergy = maxHealth;
+        if (currentHealth < 0)
+            currentHealth = 0;
+    }
+
+    void CheckEnergyBar()
+    {
+        if (currentEnergy > maxEnergy)
+            currentEnergy = maxEnergy;
+        if (currentEnergy < 0)
+            currentEnergy = 0;
+    }
+
+    public void CheckStats()
+    {
+        TakeDamage(statuses.AirborneUpdate());
+
+        if (!statuses.AttbuffUpdate())
+        {
+            attack -= statuses.attbuff;
+            statuses.attbuff = 0;
+        }
+        if (!statuses.DefbuffUpdate())
+        {
+            defense -= statuses.defbuff;
+            statuses.defbuff = 0;
+        }
+        if (!statuses.AttdebUpdate())
+        {
+            attack += statuses.attdeb;
+            statuses.attdeb = 0;
+        }
+        if (!statuses.DefdebUpdate())
+        {
+            defense += statuses.defdeb;
+            statuses.defdeb = 0;
         }
     }
 }

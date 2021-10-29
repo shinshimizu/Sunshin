@@ -20,6 +20,14 @@ public class HealthBar : MonoBehaviour
 
     public void SetHealth(int health)
     {
+        if (health > healthSlider.maxValue)
+        {
+            health = (int)healthSlider.maxValue;
+        }
+        else if (health < healthSlider.minValue)
+        {
+            health = (int)healthSlider.minValue;
+        }
         healthText.text = "HP : " + health.ToString();
         healthSlider.value = health;
     }
@@ -34,6 +42,14 @@ public class HealthBar : MonoBehaviour
 
     public void SetEnergy(int energy)
     {
+        if (energy > energySlider.maxValue)
+        {
+            energy = (int)energySlider.maxValue;
+        }
+        else if (energy < energySlider.minValue)
+        {
+            energy = (int)energySlider.minValue;
+        }
         energyText.text = "EP : " + energy.ToString();
         energySlider.value = energy;
     }
