@@ -12,17 +12,17 @@ public class CharacterScript : MonoBehaviour
     public int currentHealth;
     public int maxEnergy;
     public int currentEnergy;
-    public int attack;
-    public int magic;
-    public int defense;
-    public int resistance;
-    public int aim;
-    public int evasion;
+    public double attack;
+    public double magic;
+    public double defense;
+    public double resistance;
+    public double aim;
+    public double evasion;
     public double critChance;
     public double critDamage;
 
-    public void SetStats(int maxHealth, int maxEnergy, int attack, int magic, int defense, int resistance,
-                         int aim, int evasion, double critChance, double critDamage)
+    public void SetStats(int maxHealth, int maxEnergy, double attack, double magic, double defense, double resistance,
+                         double aim, double evasion, double critChance, double critDamage)
     {
         currentHealth = this.maxHealth = maxHealth;
         currentEnergy = this.maxEnergy = maxEnergy;
@@ -37,68 +37,72 @@ public class CharacterScript : MonoBehaviour
 
         healthBar.SetMaxHealth(maxHealth);
         healthBar.SetMaxEnergy(maxEnergy);
+
+        statuses.SetStatuses(false, 0, 1, 0);
     }
 
-    public void EnergyUpdate(int cost)
+    public void Action(int health, int energy)
     {
-        currentEnergy += cost;
-        CheckEnergyBar();
-        healthBar.SetEnergy(currentEnergy);
-    }
-
-    public void TakeDamage(int damage)
-    {
-        currentHealth -= damage;
-        CheckHealthBar();
-        healthBar.SetHealth(currentHealth);
-        currentEnergy -= 10;
-        CheckEnergyBar();
-        healthBar.SetEnergy(currentEnergy);
-        if (currentHealth < damage)
+        CheckHealthBar(health);
+        CheckEnergyBar(energy);
+        if (currentHealth == 0)
         {
             notifBoard.CheckBattle();
         }
     }
 
-    void CheckHealthBar()
+    void CheckHealthBar(int health)
     {
         if (currentHealth > maxHealth)
             currentEnergy = maxHealth;
-        if (currentHealth < 0)
+        else if (currentHealth < 0)
             currentHealth = 0;
+        else
+            currentHealth += health;
+
+        healthBar.SetHealth(currentHealth);
     }
 
-    void CheckEnergyBar()
+    void CheckEnergyBar(int energy)
     {
         if (currentEnergy > maxEnergy)
             currentEnergy = maxEnergy;
-        if (currentEnergy < 0)
+        else if (currentEnergy < 0)
             currentEnergy = 0;
+        else
+            currentEnergy += energy;
+
+        healthBar.SetEnergy(currentEnergy);
     }
 
-    public void CheckStats()
+    public void CheckStats(ref StatusesScript s)
     {
-        TakeDamage(statuses.AirborneUpdate());
+        if (s.airborneTurn > 0)
+        {
+            Action(-s.AirborneUpdate(), 0);
+            if (!s.isAirborne)
+                s.airborne = 0;
+        }
 
-        if (!statuses.AttbuffUpdate())
+        if (!s.AttbuffUpdate())
         {
-            attack -= statuses.attbuff;
-            statuses.attbuff = 0;
+            attack /= s.attbuff;
+            s.attbuff = 1;
         }
-        if (!statuses.DefbuffUpdate())
+        if (!s.DefbuffUpdate())
         {
-            defense -= statuses.defbuff;
-            statuses.defbuff = 0;
+            defense /= s.defbuff;
+            s.defbuff = 1;
         }
-        if (!statuses.AttdebUpdate())
+        if (!s.AttdebUpdate())
         {
-            attack += statuses.attdeb;
-            statuses.attdeb = 0;
+            attack *= s.attdeb;
+            s.attdeb = 1;
         }
-        if (!statuses.DefdebUpdate())
+        if (!s.DefdebUpdate())
         {
-            defense += statuses.defdeb;
-            statuses.defdeb = 0;
+            defense *= s.defdeb;
+            s.defdeb = 1;
         }
     }
 }

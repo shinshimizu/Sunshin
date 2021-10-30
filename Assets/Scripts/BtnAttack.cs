@@ -20,6 +20,8 @@ public class BtnAttack : MonoBehaviour
 
     void Start()
     {
+        player.statuses = gameObject.AddComponent<StatusesScript>();
+        enemy.statuses = gameObject.AddComponent<StatusesScript>();
         player.SetStats(100, 100, 2, 1, 2, 1, 1, 2, 0.05, 1.5);
         enemy.SetStats(100, 100, 10, 0, 5, 2, 1, 1, 0.05, 1.5);
     }
@@ -35,33 +37,32 @@ public class BtnAttack : MonoBehaviour
     {
         turn = true;
         print("Player uses skill attack and debuff enemy attack for 1 turn");
+        if (!enemy.statuses.isAttdeb)
+            enemy.statuses.SetAttdeb(1.5, 1);
         StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellA, 0));
     }
 
     public void PlayerSkill2()
     {
         turn = true;
-        player.EnergyUpdate(-10);
-        statusAttack = true;
         print("Player uses wind attack and airborne enemy for 1 turn");
+        player.Action(0, -10);
+        enemy.statuses.SetAirborne(5, 1);
         StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellB, 0));
     }
 
     public void PlayerSkill3()
     {
         turn = true;
-        player.EnergyUpdate(25);
-        int x = (int)(player.defense * 1.5) - player.defense;
-        if (!player.statuses.isDefbuff)
-        {
-            player.defense = (int)(player.defense * 1.5);
-        }
-        player.statuses.SetDefbuff(x, 2);
         print("Player uses energy recovery skill and increasing defend for 2 turn");
+        player.Action(0, 25);
+        if (!player.statuses.isDefbuff)
+            player.defense = player.defense * 1.5;
+        player.statuses.SetDefbuff(1.5, 1);
         EnemyTurn();
     }
 
-    IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, int attackType, int defendType, int skill, int delay)
+    IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, double attackType, double defendType, int skill, int delay)
     {
         yield return new WaitForSeconds(delay);
 
@@ -90,12 +91,7 @@ public class BtnAttack : MonoBehaviour
                 print(total + " damage.");
             }
 
-            defender.TakeDamage(total);
-            
-            if (statusAttack) // applying status effect
-            {
-
-            }
+            defender.Action(-total, -10);
         }
         else // dodge successful
         {
@@ -115,8 +111,8 @@ public class BtnAttack : MonoBehaviour
 
     void PlayerTurn()
     {
-        player.CheckStats();
-        if (enemy.currentEnergy > 0 && player.currentHealth > 0)
+        player.CheckStats(ref player.statuses);
+        if (enemy.currentHealth > 0 && player.currentHealth > 0)
         {
             ButtonsInteraction(true);
         }
@@ -124,7 +120,7 @@ public class BtnAttack : MonoBehaviour
 
     void EnemyTurn()
     {
-        enemy.CheckStats();
+        enemy.CheckStats(ref enemy.statuses);
 
         switch ((int)(GetRandomNumber(1, 4) * 100))
         {
@@ -134,14 +130,16 @@ public class BtnAttack : MonoBehaviour
                 break;
             case 2:
                 print("Enemy is defending for 1 turn");
-                enemy.defense += 2;
-                enemy.statuses.SetDefbuff(2, 1);
+                if (!enemy.statuses.isDefbuff)
+                    enemy.defense *= 1.5;
+                enemy.statuses.SetDefbuff(1.5, 1);
                 PlayerTurn();
                 break;
             case 3:
                 print("Enemy is raging for 1 turn");
-                enemy.attack += 2;
-                enemy.statuses.SetAttbuff(2, 1);
+                if (!enemy.statuses.isAttbuff)
+                    enemy.attack *= 1.5;
+                enemy.statuses.SetAttbuff(1.5, 1);
                 PlayerTurn();
                 break;
         }

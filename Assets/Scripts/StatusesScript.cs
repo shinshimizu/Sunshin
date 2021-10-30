@@ -10,41 +10,41 @@ public class StatusesScript : MonoBehaviour
 
     public bool isAttbuff;
     public int attbuffTurn;
-    public int attbuff;
+    public double attbuff;
 
     public bool isDefbuff;
     public int defbuffTurn;
-    public int defbuff;
+    public double defbuff;
 
     public bool isAttdeb;
     public int attdebTurn;
-    public int attdeb;
+    public double attdeb;
 
     public bool isDefdeb;
     public int defdebTurn;
-    public int defdeb;
+    public double defdeb;
 
-    private void Start()
+    public void SetStatuses(bool b, int status, double db, int turn)
     {
-        isAirborne = false;
-        airborneTurn = 0;
-        airborne = 0;
+        isAirborne = b;
+        airborneTurn = turn;
+        airborne = status;
 
-        isAttbuff = false;
-        attbuffTurn = 0;
-        attbuff = 0;
+        isAttbuff = b;
+        attbuffTurn = turn;
+        attbuff = db;
 
-        isDefbuff = false;
-        defbuffTurn = 0;
-        defbuff = 0;
+        isDefbuff = b;
+        defbuffTurn = turn;
+        defbuff = db;
 
-        isAttdeb = false;
-        attdebTurn = 0;
-        attdeb = 0;
+        isAttdeb = b;
+        attdebTurn = turn;
+        attdeb = db;
 
-        isDefdeb = false;
-        defdebTurn = 0;
-        defdeb = 0;
+        isDefdeb = b;
+        defdebTurn = turn;
+        defdeb = db;
     }
 
     public void SetAirborne(int val, int turn)
@@ -54,28 +54,28 @@ public class StatusesScript : MonoBehaviour
         airborne = val;
     }
 
-    public void SetAttbuff(int val, int turn)
+    public void SetAttbuff(double val, int turn)
     {
         isAttbuff = true;
         attbuffTurn = turn;
         attbuff = val;
     }
 
-    public void SetDefbuff(int val, int turn)
+    public void SetDefbuff(double val, int turn)
     {
         isDefbuff = true;
-        defbuffTurn = turn;
+        defbuffTurn = turn - 1;
         defbuff = val;
     }
 
-    public void SetAttdeb(int val, int turn)
+    public void SetAttdeb(double val, int turn)
     {
         isAttdeb = true;
         attdebTurn = turn;
         attdeb = val;
     }
 
-    public void SetDefdeb(int val, int turn)
+    public void SetDefdeb(double val, int turn)
     {
         isDefdeb = true;
         defdebTurn = turn;
@@ -88,10 +88,9 @@ public class StatusesScript : MonoBehaviour
         {
             airborneTurn--;
         }
-        else
+        if (airborneTurn == 0)
         {
             isAirborne = false;
-            airborne = 0;
         }
         return airborne;
     }
