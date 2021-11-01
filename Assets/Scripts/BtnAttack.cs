@@ -8,16 +8,12 @@ public class BtnAttack : MonoBehaviour
     int weaponAtt = 10;
     int spellA = 10;
     int spellB = 20;
-    //int[] condiDamage;
-    //int[] condiTurn;
     int total;
-    bool turn;
-    bool statusAttack;
 
     public CharacterScript player;
     public CharacterScript enemy;
     public Button[] buttons = new Button[4];
-
+    
     void Start()
     {
         player.statuses = gameObject.AddComponent<StatusesScript>();
@@ -28,53 +24,66 @@ public class BtnAttack : MonoBehaviour
 
     public void PlayerAttack()
     {
-        turn = true;
         print("Player uses basic attack");
-        StartCoroutine(AttackHandler(player, enemy, player.attack, enemy.defense, weaponAtt, 0));
+        StartCoroutine(AttackHandler(player, enemy, player.attack, enemy.defense, weaponAtt, (success) => { }));
+        player.CheckStats(ref player.statuses);
+        StartCoroutine(EnemyTurn());
     }
 
     public void PlayerSkill1()
     {
-        turn = true;
         print("Player uses skill attack and debuff enemy attack for 1 turn");
-        if (!enemy.statuses.isAttdeb)
-            enemy.statuses.SetAttdeb(1.5, 1);
-        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellA, 0));
+        player.Action(0, -5);        
+        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellA, (success) =>
+        {
+            if (success)
+            {
+                if (!enemy.statuses.isAttdeb)
+                    enemy.attack /= 1.5;
+                enemy.statuses.SetAttdeb(1.5, 1);
+                print("Enemy att reduced to " + enemy.attack);
+            }
+        }));
+        player.CheckStats(ref player.statuses);
+        StartCoroutine(EnemyTurn());
     }
 
     public void PlayerSkill2()
     {
-        turn = true;
         print("Player uses wind attack and airborne enemy for 1 turn");
         player.Action(0, -10);
-        enemy.statuses.SetAirborne(5, 1);
-        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellB, 0));
+        StartCoroutine(AttackHandler(player, enemy, player.magic, enemy.resistance, spellB, (success) => 
+        {
+            if (success) 
+            {
+                print("Attack success, applying status effect");
+                enemy.statuses.SetAirborne(5, 1);
+            }
+        }));
+        player.CheckStats(ref player.statuses);
+        StartCoroutine(EnemyTurn());
     }
 
     public void PlayerSkill3()
     {
-        turn = true;
-        print("Player uses energy recovery skill and increasing defend for 2 turn");
-        player.Action(0, 25);
+        print("Player uses energy recovery skill and increasing defend for 1 turn");
+        player.Action(0, 15);
         if (!player.statuses.isDefbuff)
             player.defense = player.defense * 1.5;
         player.statuses.SetDefbuff(1.5, 1);
-        EnemyTurn();
+        player.CheckStats(ref player.statuses);
+        StartCoroutine(EnemyTurn());
     }
 
-    IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, double attackType, double defendType, int skill, int delay)
+    IEnumerator AttackHandler(CharacterScript attacker, CharacterScript defender, double attackType, double defendType, int skill, System.Action<bool> action)
     {
-        yield return new WaitForSeconds(delay);
-
-        ButtonsInteraction(false);
-
         double dodge = 0.05;
         if (defender.evasion > attacker.aim) // calculate dodge
         {
             dodge = 0.05 * 2 * defender.evasion / attacker.aim;
         }
 
-        if (Random.value > dodge || defender.currentEnergy == 0) // attack successful
+        if (Random.value > dodge || defender.currentEnergy < 10) // attack successful
         {
             float power = (float)defendType / (float)attackType;
             double percentDamage = Mathf.Pow(0.5f, power);
@@ -84,65 +93,65 @@ public class BtnAttack : MonoBehaviour
             if (Random.value < attacker.critChance) // calculate crit damage
             {
                 total = (int)(total * attacker.critDamage);
-                print(total + " critical damage!");
+                print("Deal " + total + " critical damage!");
             }
             else
             {
-                print(total + " damage.");
+                print("Deal " + total + " damage.");
             }
 
             defender.Action(-total, -10);
+            action(true);
         }
         else // dodge successful
         {
             print("Attack missed");
+            action(false);
         }
-
-        if (turn) // enemy turn
-        {
-            turn = false;
-            EnemyTurn();                        
-        }
-        else
-        {
-            PlayerTurn();
-        }
+        yield return null;
     }
 
     void PlayerTurn()
     {
-        player.CheckStats(ref player.statuses);
         if (enemy.currentHealth > 0 && player.currentHealth > 0)
         {
             ButtonsInteraction(true);
         }
+        player.Action(0, 2);
     }
 
-    void EnemyTurn()
+    IEnumerator EnemyTurn()
     {
-        enemy.CheckStats(ref enemy.statuses);
+        ButtonsInteraction(false);
+        enemy.Action(0, 2);
+        print("Enemy att is " + enemy.attack);
 
-        switch ((int)(GetRandomNumber(1, 4) * 100))
+        switch ((int)(GetRandomNumber(1, 6) * 100))
         {
-            case 1:
-                print("Enemy uses basic attack");
-                StartCoroutine(AttackHandler(enemy, player, enemy.attack, player.defense, 1, 1));
-                break;
-            case 2:
+            case 4:
                 print("Enemy is defending for 1 turn");
                 if (!enemy.statuses.isDefbuff)
                     enemy.defense *= 1.5;
                 enemy.statuses.SetDefbuff(1.5, 1);
-                PlayerTurn();
+                enemy.Action(0, 5);
                 break;
-            case 3:
+            case 5:
                 print("Enemy is raging for 1 turn");
                 if (!enemy.statuses.isAttbuff)
                     enemy.attack *= 1.5;
-                enemy.statuses.SetAttbuff(1.5, 1);
-                PlayerTurn();
+                enemy.statuses.SetAttbuff(1.5, 0);
+                enemy.Action(0, 2);
+                break;
+            default:
+                print("Enemy uses basic attack");
+                StartCoroutine(AttackHandler(enemy, player, enemy.attack, player.defense, 1, (success) => { }));
                 break;
         }
+
+        yield return new WaitForSeconds(1f);
+        enemy.CheckStats(ref enemy.statuses);
+        print("Enemy att returned to " + enemy.attack);
+        PlayerTurn();
     }
 
     void ButtonsInteraction(bool interaction)

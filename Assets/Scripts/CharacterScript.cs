@@ -43,7 +43,7 @@ public class CharacterScript : MonoBehaviour
 
     public void Action(int health, int energy)
     {
-        CheckHealthBar(health);
+        CheckHealthBar(health);        
         CheckEnergyBar(energy);
         if (currentHealth == 0)
         {
@@ -80,6 +80,7 @@ public class CharacterScript : MonoBehaviour
         if (s.airborneTurn > 0)
         {
             Action(-s.AirborneUpdate(), 0);
+            print("Total " + s.airborne + " airborne damage!");
             if (!s.isAirborne)
                 s.airborne = 0;
         }

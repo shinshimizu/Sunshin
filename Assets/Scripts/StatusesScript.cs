@@ -64,14 +64,14 @@ public class StatusesScript : MonoBehaviour
     public void SetDefbuff(double val, int turn)
     {
         isDefbuff = true;
-        defbuffTurn = turn - 1;
+        defbuffTurn = turn;
         defbuff = val;
     }
 
     public void SetAttdeb(double val, int turn)
     {
         isAttdeb = true;
-        attdebTurn = turn;
+        attdebTurn = turn - 1;
         attdeb = val;
     }
 
