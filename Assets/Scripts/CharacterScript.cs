@@ -8,18 +8,33 @@ public class CharacterScript : MonoBehaviour
     public NotifboardScript notifBoard;
     public StatusesScript statuses;
 
+    // core stats
     public int maxHealth;
-    public int currentHealth;
     public int maxEnergy;
-    public int currentEnergy;
     public double attack;
     public double magic;
     public double defense;
     public double resistance;
     public double aim;
     public double evasion;
+
+    public int currentHealth;
+    public int currentEnergy;    
     public double critChance;
     public double critDamage;
+
+    public int MaxHealth { get; set; }
+    public int MaxEnergy { get; set; }
+    public double Attack { get; set; }
+    public double Magic { get; set; }
+    public double Defense { get; set; }
+    public double Resistance { get; set; }
+    public double Accuracy { get; set; }
+    public double Evasion { get; set; }
+    public int CurrHealth { get; set; }
+    public int CurrEnergy { get; set; }
+    public double CritChance { get; set; }
+    public double CritDamage { get; set; }
 
     public void SetStats(int maxHealth, int maxEnergy, double attack, double magic, double defense, double resistance,
                          double aim, double evasion, double critChance, double critDamage)
