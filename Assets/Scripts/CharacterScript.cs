@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterScript : MonoBehaviour
 {
-    public HealthBar healthBar;
+    public WorldBar healthBar;
     public NotifboardScript notifBoard;
     public StatusesScript statuses;
 
@@ -50,8 +50,8 @@ public class CharacterScript : MonoBehaviour
         this.critChance = critChance;
         this.critDamage = critDamage;
 
-        healthBar.SetMaxHealth(maxHealth);
-        healthBar.SetMaxEnergy(maxEnergy);
+        // healthBar.SetMaxHealth(maxHealth);
+        // healthBar.SetMaxEnergy(maxEnergy);
 
         statuses.SetStatuses(false, 0, 1, 0);
     }

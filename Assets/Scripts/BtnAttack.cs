@@ -86,8 +86,8 @@ public class BtnAttack : MonoBehaviour
         if (Random.value > dodge || defender.currentEnergy < 10) // attack successful
         {
             float power = (float)defendType / (float)attackType;
-            double percentDamage = Mathf.Pow(0.5f, power);
-            int damage = (int)((attackType * GetRandomNumber(75, 101)) + (skill * GetRandomNumber(50, 101)));
+            double percentDamage = Mathf.Pow(0.5f, power); // calculate damage reduction
+            int damage = (int)((attackType * GetRandomNumber(75, 101)) + (skill * GetRandomNumber(50, 101))); // randomized damage
             total = (int)(damage * percentDamage);
 
             if (Random.value < attacker.critChance) // calculate crit damage
@@ -139,8 +139,9 @@ public class BtnAttack : MonoBehaviour
                 print("Enemy is raging for 1 turn");
                 if (!enemy.statuses.isAttbuff)
                     enemy.attack *= 1.5;
-                enemy.statuses.SetAttbuff(1.5, 0);
+                enemy.statuses.SetAttbuff(1.5, 1);
                 enemy.Action(0, 2);
+                print("Enemy atk is raised to " + enemy.attack);
                 break;
             default:
                 print("Enemy uses basic attack");
