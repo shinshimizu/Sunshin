@@ -54,7 +54,7 @@ public class CharacterBattle : MonoBehaviour
         Vector2 ViewportPosition = Camera.main.WorldToViewportPoint(transform.position);
         Vector2 ScreenPosition = new Vector2(
             ((ViewportPosition.x * canvas.GetComponent<RectTransform>().sizeDelta.x) - (canvas.GetComponent<RectTransform>().sizeDelta.x * 0.5f)),
-            ((ViewportPosition.y * canvas.GetComponent<RectTransform>().sizeDelta.y) - (canvas.GetComponent<RectTransform>().sizeDelta.y * 0.5f) + 50));
+            ((ViewportPosition.y * canvas.GetComponent<RectTransform>().sizeDelta.y) - (canvas.GetComponent<RectTransform>().sizeDelta.y * 0.5f) + 100));
         characterWorldBar.GetComponent<RectTransform>().anchoredPosition = ScreenPosition;
         SetEnemyStats(enemy, () => {
             SetWorldBar(characterWorldBar, characterBase.Hp, characterBase.Ep);

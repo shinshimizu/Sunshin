@@ -80,11 +80,17 @@ public class BattleHandler : MonoBehaviour
 
         if (state == State.Busy)
         {
-            button.skills[0].interactable = false;
+            foreach (Button skill in button.skills)
+            {
+                skill.interactable = false;
+            }
         }
         else
         {
-            button.skills[0].interactable = true;
+            foreach (Button skill in button.skills)
+            {
+                skill.interactable = true;
+            }
         }
         /*
         if (state == State.WaitingForPlayer)
